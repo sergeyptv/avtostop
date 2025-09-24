@@ -24,6 +24,19 @@ func unpredictableFunc() int64 {
 // Если "длинная" функция отработала за это время - отлично, возвращаем результат.
 // Если нет - возвращаем ошибку. Результат работы в этом случае нам не важен.
 func predictableFunc() int64 {
+	var rnd int64
+
+	returnCh := make(chan int64, 1)
+	go func() {
+		returnCh <- unpredictableFunc()
+	}()
+
+	select {
+	case <-time.After(time.Second):
+		return 0
+	case rnd = <-returnCh:
+		return rnd
+	}
 }
 
 func main() {
