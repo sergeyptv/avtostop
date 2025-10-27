@@ -1,23 +1,33 @@
 // time.Sleep использовать нельзя. это будет не валидным ответом на собеседовании
+//
 // 1. Иногда приходят нули. В чем проблема? Исправь ее
+// Проблема может быть в "замыкании" - когда для всех горутин i будет одинаковым. Также необходимо добавить WaitGroup,
+// чтобы горутины успели выполниться до вызова функции sumOfMap.
+//
 // 2. Если функция bank_network_call выполняется 5 секунд, то за сколько выполнится balance()?
+// balance() выполнится практически мгновенно.
+//
 
 func balance() int {
 	x := make(map[int]int, 1)
 	var m sync.Mutex
+	var wg sync.WaitGroup
 
 	// call bank
 	for i := 0; i < 5; i++ {
-		i := i
-		go func () {
+		wg.Add(1)
+		go func (i int) {
+			defer wg.Done()
+
 			m.Lock()
 			b := bank_network_call(i)
 
 			x[i] = b
 			m.Unlock()
-		}()
+		}(i)
 	}
 
+	wg.Wait()
 // Как-то считается сумма значений в мапе и возвращается
 return sumOfMap
 }
