@@ -1,22 +1,22 @@
 // Что значит каждая функция и
 // Как будет собираться докер образ?
 // Какие команды для сборки и запуска контейнера?
-FROM golang:1.17 AS builder
+FROM golang:1.17 AS builder // контейнер собирается из образа golang:1.17 и ему присваивается имя "builder"
 
-WORKDIR /app
+WORKDIR /app // устанавливается рабочая директория, все команды далее будут выполняться из нее
 
-COPY go.mod go.sum ./
+COPY go.mod go.sum ./ // копируются файлы go.mod и go.sum в /app
 
-RUN go mod download
+RUN go mod download // устанавливаются зависимости
 
-COPY . .
+COPY . . // копируется вся программа
 
-RUN go build -o myapp .
+RUN go build -o myapp . // создается бинарник с именем myapp
 
-FROM alpine:latest
+FROM alpine:latest // собирается новый контейнер на базе alpine
 
-WORKDIR /root/
+WORKDIR /root/ // устанавливается рабочая директория, все команды далее будут выполняться из нее
 
-COPY --from=builder /app/myapp .
+COPY --from=builder /app/myapp . // копируется бинарник myapp из контейнера "builder"
 
-CMD ["./myapp"]
+CMD ["./myapp"] // запускается бинарник
